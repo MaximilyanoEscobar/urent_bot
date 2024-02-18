@@ -3,10 +3,10 @@ import time
 from typing import Callable, Dict, Any, Awaitable
 
 from aiogram import BaseMiddleware
-from aiogram.types import Message, TelegramObject, CallbackQuery
-from loader import logger
+from aiogram.types import TelegramObject, CallbackQuery
 
-from data.settings import MESSAGE_SPAM_TIMING, CALLBACK_SPAM_TIMING
+from data.settings import CALLBACK_SPAM_TIMING
+from loader import logger
 
 
 class CallbackSpamMiddleware(BaseMiddleware):

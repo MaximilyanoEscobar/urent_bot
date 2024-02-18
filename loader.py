@@ -2,7 +2,6 @@ import datetime
 from aiogram import Bot, Dispatcher, Router
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.fsm.storage.redis import RedisStorage
 from loguru import logger
 from data.settings import BOTS_TOKENS
 

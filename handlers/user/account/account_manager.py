@@ -4,8 +4,7 @@ import re
 import traceback
 
 import aiohttp
-from aiogram import Router, Bot
-from aiogram.filters import Text
+from aiogram import Router, Bot, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import any_state
 from aiogram.types import CallbackQuery, InlineKeyboardButton, WebAppInfo, Message
@@ -25,7 +24,7 @@ from loader import StateWaitMessage
 account_router = Router(name='account_router')
 
 
-@account_router.callback_query(Text(startswith=['get_account', 'update_acc']), any_state)
+@account_router.callback_query(F.data.startswith(['get_account', 'update_acc']), any_state)
 async def send_account_menu(call: CallbackQuery):
     coupon_match = re.search("coupon=([a-zA-Z0-9]{16})", call.data)
     if not coupon_match:
@@ -126,7 +125,7 @@ async def send_account_menu(call: CallbackQuery):
                 await call.answer('Информация обновлена', show_alert=True)
 
 
-@account_router.callback_query(Text("off_auto_stop"))
+@account_router.callback_query(F.data == "off_auto_stop")
 async def off_auto_stop(call: CallbackQuery, bot: Bot):
     try:
         await call.answer("Автозавершение выключено", show_alert=True)
@@ -145,7 +144,7 @@ async def off_auto_stop(call: CallbackQuery, bot: Bot):
         print(traceback.format_exc())
 
 
-@account_router.callback_query(Text("on_auto_stop"))
+@account_router.callback_query(F.data == "on_auto_stop")
 async def on_auto_stop(call: CallbackQuery, bot: Bot):
     try:
         await call.answer("Автозавершение включено", show_alert=True)
@@ -164,7 +163,7 @@ async def on_auto_stop(call: CallbackQuery, bot: Bot):
         print(traceback.format_exc())
 
 
-@account_router.callback_query(Text(startswith=[
+@account_router.callback_query(F.data.startswith([
     "get_cost",
     "check_payment",
     "start_drive",

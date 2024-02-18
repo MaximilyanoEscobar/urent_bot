@@ -10,7 +10,7 @@ class User(Base, Model):
 
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     user_id = Column(BigInteger, primary_key=True, unique=True, nullable=False)
-    username = Column(VARCHAR(50), nullable=True)
+    username = Column(VARCHAR(50), nullable=True, unique=False)
 
     @property
     def stats(self) -> str:

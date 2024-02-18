@@ -12,10 +12,9 @@ class UserRepository:
     async def add_user(self, user_id: int, username: str):
         async with self.session_maker() as session:
             async with session.begin():
-                user = User(
-                    user_id=user_id,
-                    username=username
-                )
+                user = User
+                user.user_id = user_id
+                user.user_name = username
                 try:
                     session.add(user)
                 except Exception:

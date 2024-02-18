@@ -87,7 +87,7 @@ async def check_rides():
                 continue
             urent_api = UrentAPI(session, refresh_token, phone_number, access_token)
             active_travel_check_json: dict | bool = await urent_api.get_active_travel()
-            if type(active_travel_check_json) is bool:
+            if isinstance(active_travel_check_json, bool):
                 await rides_repository.update_finish_ride(ride.id, finish_time=datetime.datetime.now())
                 continue
             if not bool(len(active_travel_check_json['activities'])):
@@ -120,4 +120,4 @@ async def main(dp) -> None:
 if __name__ == '__main__':
     from loader import dp
 
-    asyncio.get_event_loop().run_until_complete(main(dp))
+    asyncio.run(main(dp))

@@ -1,8 +1,8 @@
 import asyncio
 import random
 
-from aiogram import Router, Bot
-from aiogram.filters import Text, Command
+from aiogram import Router, Bot, F
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import any_state
 from aiogram.types import CallbackQuery, InlineKeyboardButton, Message
@@ -48,13 +48,13 @@ async def get_text_messages(message: Message, state: FSMContext, bot: Bot):
         reply_markup=MAIN_MENU.as_markup(resize_keyboard=True))
 
 
-@keyboard_router.message(Text(text='🔑 Ввести ключик'))
+@keyboard_router.message(F.text=='🔑 Ввести ключик')
 async def enter_key(message: Message, state: FSMContext):
     await message.reply('<b>Напишите мне пожалуйста ключ, который Вы приобрели в боте 😘</b>')
     await state.set_state(StateWaitMessage.input_key)
 
 
-@keyboard_router.message(Text(text='💬 Помощь'))
+@keyboard_router.message(F.text=='💬 Помощь')
 @keyboard_router.message(Command('help'))
 async def help_answer(message: Message):
     await message.reply(
@@ -81,34 +81,34 @@ async def input_key(message: Message, state: FSMContext):
         await message.answer(f"<b>❌ Ключ не подходит 😥</b>")
 
 
-@keyboard_router.callback_query(Text('return_to_personal_account'))
-@keyboard_router.message(Text('ℹ️ Личный кабинет'))
-async def personal_area(message: CallbackQuery | Message):
+@keyboard_router.callback_query(F.data == 'return_to_personal_account')
+@keyboard_router.message(F.text == 'ℹ️ Личный кабинет')
+async def personal_area(event: CallbackQuery | Message):
 
     personal_area_menu = InlineKeyboardBuilder()
     personal_area_menu.row(InlineKeyboardButton(text="История активаций", callback_data="purchase_history|send_initial_menu"))
     personal_area_menu.row(InlineKeyboardButton(text="Мои аккаунты", callback_data="accounts_list|send_initial_menu"))
 
-    tg_user_id = message.from_user.id
+    tg_user_id = event.from_user.id
     accounts_deleted = await account_repository.get_accounts_by_user_id(user_id=tg_user_id, is_delete=True)
     accounts_not_deleted = await account_repository.get_accounts_by_user_id(user_id=tg_user_id)
     number_of_purchases = len(accounts_deleted) + len(accounts_not_deleted)
     user_data = await user_repository.get_user(user_id=tg_user_id)
     registration_date = user_data.creation_date.strftime('%Y-%m-%d %H:%M:%S')
-    message_text = f'<b>💜 Пользователь: @{message.from_user.username}\n' \
+    message_text = f'<b>💜 Пользователь: @{event.from_user.username}\n' \
                    f'🔑 ID: <code>{tg_user_id}</code>\n' \
                    f'💸 Количество покупок: {number_of_purchases}\n' \
                    f'📋 Дата регистрации: {registration_date}</b>'
-    if type(message) == CallbackQuery:
+    if type(event) == CallbackQuery:
         try:
-            await message.message.edit_text(message_text, reply_markup=personal_area_menu.as_markup())
+            await event.message.edit_text(message_text, reply_markup=personal_area_menu.as_markup())
         except Exception:
-            await message.message.answer(message_text, reply_markup=personal_area_menu.as_markup())
+            await event.message.answer(message_text, reply_markup=personal_area_menu.as_markup())
     else:
         try:
-            await message.edit_text(message_text, reply_markup=personal_area_menu.as_markup())
+            await event.edit_text(message_text, reply_markup=personal_area_menu.as_markup())
         except Exception:
-            await message.answer(message_text, reply_markup=personal_area_menu.as_markup())
+            await event.answer(message_text, reply_markup=personal_area_menu.as_markup())
 
 
 @keyboard_router.message()

@@ -5,7 +5,7 @@ from db import Base
 from db.base import Model
 
 
-class Rides(Base, Model):
+class Rides(Model, Base):
     """Таблица аккаунтов"""
     __tablename__ = 'rides'
 

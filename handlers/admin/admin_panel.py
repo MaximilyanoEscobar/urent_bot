@@ -1,49 +1,42 @@
 import asyncio
 import os
 import re
-import traceback
-from pprint import pprint
+
 import aiofiles
 import aiohttp
-from aiogram import types
-from aiogram.filters import Text, Command
+from aiogram import types, F
+from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import any_state
+from aiogram.types import FSInputFile
 from aiogram.types import InlineKeyboardButton, CallbackQuery, Message
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.types import FSInputFile
-from api.sms_actiwator import SMSActiwatorAPI
+
 from api.urent import UrentAPI
 from data.keyboards import CANCEL_KEYBOARD
-from api.five_sim import FiveSIM
 from db import Accounts
 from db.repository import user_repository, account_repository
 from loader import *
-from utils.is_status import is_admin
 
-# from utils.throttling import rate_limit
 
 admin_router = Router(name="admin_router")
 
 
-@admin_router.callback_query(Text(text="cancel"), any_state)
+@admin_router.callback_query(F.text == "cancel", any_state)
 async def cancel_action(call: CallbackQuery, state: FSMContext):
     await call.message.edit_text(call.message.text)
     await state.clear()
 
 
 @admin_router.message(Command(commands=['admin']))
-# @rate_limit(limit=3, key="admin")
-@is_admin
 async def admin_menu(message: types.Message):
     keyboard = InlineKeyboardBuilder()
     keyboard.row(InlineKeyboardButton(text='Лог ключа', callback_data='log_key'))
     keyboard.row(InlineKeyboardButton(text='Открыть аккаунт', callback_data='open_account'))
     keyboard.row(InlineKeyboardButton(text='Лог человека', callback_data='log_user'))
-    keyboard.row(InlineKeyboardButton(text='Возобновить ключ', callback_data='refresh_coupon'))
-    keyboard.row(InlineKeyboardButton(text='Возобновить все личные аккаунты', callback_data='refresh_all_accounts'))
-    keyboard.row(InlineKeyboardButton(text="Urent | Выгрузить удаленные аккаунты в виде .txt",
-                                      callback_data='upload_used_accounts'))
+    # keyboard.row(InlineKeyboardButton(text='Возобновить ключ', callback_data='refresh_coupon'))
+    # keyboard.row(InlineKeyboardButton(text='Возобновить все личные аккаунты', callback_data='refresh_all_accounts'))
+    # keyboard.row(InlineKeyboardButton(text="Urent | Выгрузить удаленные аккаунты в виде .txt", callback_data='upload_used_accounts'))
 
     count_users_in_tg_bot = await user_repository.select_all_users()
     await message.answer(f'<b>Успешный вход в админ панель!\n'
@@ -51,7 +44,7 @@ async def admin_menu(message: types.Message):
                          reply_markup=keyboard.as_markup())
 
 
-@admin_router.callback_query(Text(text='refresh_coupon'))
+@admin_router.callback_query(F.data == 'refresh_coupon')
 async def refresh_coupon(call: CallbackQuery, state: FSMContext):
     await call.message.edit_text(text='<b>Введите ключ, который вы хотите возобновить</b>')
     await state.set_state(StateWaitMessage.input_coupon_to_refresh)
@@ -67,7 +60,7 @@ async def input_coupon_to_refresh(message: Message, state: FSMContext):
     await message.reply('<b>Ключ успешно возобновлен</b>')
 
 
-@admin_router.callback_query(Text(text='refresh_all_accounts'))
+@admin_router.callback_query(F.data == 'refresh_all_accounts')
 async def refresh_all_accounts(call: CallbackQuery):
     await call.message.edit_text(text='<b>Процесс восстановления аккаунтов начат. Ожидайте.</b>')
     accounts = await account_repository.get_accounts_by_user_id(user_id=call.from_user.id, is_delete=True)
@@ -111,7 +104,7 @@ async def refresh_token_by_account(account: Accounts, file):
 
 
 
-@admin_router.callback_query(Text("open_account"))
+@admin_router.callback_query(F.data == "open_account")
 async def input_coupon_account(call: CallbackQuery, state: FSMContext):
     await state.set_state(StateWaitMessage.input_coupon_account_for_log)
     await call.message.edit_text(text="<b>Введите ключ | id человека для открытия аккаунта: </b>",
@@ -145,7 +138,7 @@ async def open_kb_account(message: types.Message, state: FSMContext, bot: Bot):
                                 chat_id=message.from_user.id)
 
 
-@admin_router.callback_query(Text(startswith=['log_key', 'log_user']))
+@admin_router.callback_query(F.data.startswith(['log_key', 'log_user']))
 async def input_cache(call: CallbackQuery, state: FSMContext):
     if call.data == 'log_key':
         await call.message.edit_text('<b>Введите ключ:</b>', reply_markup=CANCEL_KEYBOARD.as_markup())

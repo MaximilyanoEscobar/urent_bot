@@ -1,6 +1,5 @@
 import aiohttp
-from aiogram import Router, Bot
-from aiogram.filters import Text
+from aiogram import Router, Bot, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import any_state
 from aiogram.types import CallbackQuery, InlineKeyboardButton, Message
@@ -15,7 +14,7 @@ from utils.paginator import Paginator
 profile_router = Router(name="profile_router")
 
 
-@profile_router.callback_query(Text('add_personal_account'))
+@profile_router.callback_query(F.data == 'add_personal_account')
 async def add_personal_account(call: CallbackQuery, state: FSMContext):
     kb_back_to_account_list = InlineKeyboardBuilder()
     kb_back_to_account_list.row(InlineKeyboardButton(text='Вернуться в список аккаунтов', callback_data='accounts_list|send_initial_menu'))
@@ -95,7 +94,7 @@ async def input_sms_code(message: Message, state: FSMContext, bot: Bot):
             return message.reply('<b>Вы успешно вошли в свой аккаунт!</b>', reply_markup=keyboard.as_markup())
 
 
-@profile_router.callback_query(Text(startswith=['accounts_list']), any_state)
+@profile_router.callback_query(F.data.startswith(['accounts_list']), any_state)
 async def send_accounts_list_menu(call: CallbackQuery, state: FSMContext):
     await state.clear()
     tg_user_id = call.from_user.id
@@ -131,7 +130,7 @@ async def send_accounts_list_menu(call: CallbackQuery, state: FSMContext):
                           'Давай исправим это ?', show_alert=True)
 
 
-@profile_router.callback_query(Text(startswith=['purchase_history']), any_state)
+@profile_router.callback_query(F.data.startswith(['purchase_history']), any_state)
 async def send_purchase_history_menu(call: CallbackQuery):
     tg_user_id = call.from_user.id
     accounts_deleted = await account_repository.get_accounts_by_user_id(user_id=tg_user_id, is_delete=True)

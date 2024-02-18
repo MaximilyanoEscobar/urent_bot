@@ -8,9 +8,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from db import Cards
-from db.engine import return_session_db, get_db
-from db.repository import account_repository, cards_repository
-from web.schema.responses import ResponseUploadAccount, CardsOut
+from db.engine import get_db
+from db.repository import account_repository
+from web.schema.responses import ResponseUploadAccount
 from web.schema.schemas import UploadSchema
 
 router = APIRouter(tags=["urent"])
