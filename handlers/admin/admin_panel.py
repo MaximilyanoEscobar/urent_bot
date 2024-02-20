@@ -168,7 +168,7 @@ async def get_log_key(message: types.Message, state: FSMContext, bot: Bot):
     login_method = "Активация"
     tg_user_id = account_data.user_id
     try:
-        tg_username = account_data.user.username
+        tg_username = account_data.username.username
     except:
         tg_username = None
     phone_number = account_data.number

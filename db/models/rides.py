@@ -1,11 +1,11 @@
 from sqlalchemy import Column, Integer, Text, Boolean, BigInteger, ForeignKey, String, JSON, DateTime
 from sqlalchemy.orm import relationship, backref
 
-from db import Base
-from db.base import Model
+from db import BaseModel
+from db.base import CleanModel
 
 
-class Rides(Model, Base):
+class Rides(BaseModel, CleanModel):
     """Таблица аккаунтов"""
     __tablename__ = 'rides'
 

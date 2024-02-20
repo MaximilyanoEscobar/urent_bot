@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 import asyncio
-import traceback
 import datetime
 
 import aiohttp.client
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from aiogram import Dispatcher
 from colorama import Style, Fore
 from api.urent import UrentAPI
+from db.configuration import DatabaseConfig
+from db import create_async_engine, get_session_maker
 from handlers import register_user_commands
 from loader import logger, bots_list
 from utils.callback_throttling import CallbackSpamMiddleware
@@ -22,10 +23,10 @@ async def on_startup(dp):
         await bot.delete_webhook(drop_pending_updates=True)
         bot_info = await bot.get_me()
         print(f"{Style.BRIGHT}{Fore.CYAN}https://t.me/{bot_info.username} запущен успешно!", Style.RESET_ALL)
-    scheduler = AsyncIOScheduler()
-    scheduler.add_job(func=check_rides, trigger="interval", seconds=5)
-    scheduler.add_job(func=remove_cards, trigger="cron", hour=6)
-    scheduler.start()
+    # scheduler = AsyncIOScheduler()
+    # scheduler.add_job(func=check_rides, trigger="interval", seconds=5)
+    # scheduler.add_job(func=remove_cards, trigger="cron", hour=6)
+    # scheduler.start()
 
 
 async def remove_cards():
@@ -107,14 +108,13 @@ async def check_rides():
                                                             f'Номер телефона: <code>{phone_number[:-4]}****</code></b>')
 
 
-async def main(dp) -> None:
+async def main(dp: Dispatcher) -> None:
     await on_startup(dp)
-    try:
-        dp.message.middleware.register(MessageSpamMiddleware())
-        dp.callback_query.middleware.register(CallbackSpamMiddleware())
-        await dp.start_polling(*bots_list)
-    except Exception:
-        print(traceback.format_exc())
+    async_engine = create_async_engine(DatabaseConfig().build_connection_str())
+    session_maker = get_session_maker(async_engine)
+    dp.message.middleware.register(MessageSpamMiddleware())
+    dp.callback_query.middleware.register(CallbackSpamMiddleware())
+    await dp.start_polling(*bots_list, session_maker=session_maker)
 
 
 if __name__ == '__main__':

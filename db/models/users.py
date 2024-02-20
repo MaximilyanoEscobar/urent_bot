@@ -1,10 +1,10 @@
 from sqlalchemy import Column, Integer, BigInteger, VARCHAR, Boolean
 
-from db import Base
-from db.base import Model
+from db import BaseModel
+from db.base import CleanModel
 
 
-class User(Base, Model):
+class User(BaseModel, CleanModel):
     """Таблица юзеров"""
     __tablename__ = 'users'
 

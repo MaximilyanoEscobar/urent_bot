@@ -1,11 +1,10 @@
 from sqlalchemy import Column, Integer, Text, Boolean, BigInteger, ForeignKey, String, JSON
 from sqlalchemy.orm import relationship, backref
 
-from db import Base
-from db.base import Model
+from db import BaseModel
+from db.base import CleanModel
 
-
-class Accounts(Base, Model):
+class Accounts(BaseModel, CleanModel):
     """Таблица аккаунтов"""
     __tablename__ = 'accounts'
 
@@ -18,7 +17,7 @@ class Accounts(Base, Model):
     points = Column(BigInteger, nullable=False, default=0)
     is_delete = Column(Boolean, default=False)
     user_id = Column(BigInteger, ForeignKey('users.user_id'), nullable=True)
-    user = relationship("User", cascade="all,delete", backref=backref("user", uselist=False), lazy='subquery', foreign_keys=[user_id])
+    user = relationship("User", cascade="all,delete", backref=backref("username", uselist=False), lazy='subquery', foreign_keys=[user_id])
 
     @property
     def stats(self) -> str:

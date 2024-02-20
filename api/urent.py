@@ -440,7 +440,7 @@ class UrentAPI(object):
     async def get_user_id(self, status_code=401):
         while status_code == 401:
             rewrite_headers = self.headers.copy()
-            rewrite_headers.pop('ur-user-id')
+            rewrite_headers.pop('ur-username-id')
             async with self.session.get(url="https://service.urentbike.ru/gatewayclient/api/v1/profile",
                                         headers=rewrite_headers, proxy=PROXY) as response_profile:
                 status_code = response_profile.status
@@ -449,7 +449,7 @@ class UrentAPI(object):
                 else:
                     pprint(response_profile := await response_profile.json())
                     self.user_id = response_profile['id']
-                    self.headers = {**self.headers, **{"ur-user-id": self.user_id}}
+                    self.headers = {**self.headers, **{"ur-username-id": self.user_id}}
 
     """Ебучий случай вход на личный аккаунт"""
 
@@ -494,9 +494,9 @@ class UrentAPI(object):
             'ur-device-id': device_id,
             'ur-platform': 'Android',
             'ur-_session': session_id,
-            'ur-user-id': system_id,
+            'ur-username-id': system_id,
             'ur-version': '1.13',
-            'user-agent': 'Urent/1.13 (ru.urentbike.app; build: 1120; Android 7.1.4 okhttp/4.9.1',
+            'username-agent': 'Urent/1.13 (ru.urentbike.app; build: 1120; Android 7.1.4 okhttp/4.9.1',
             'accept-language': 'ru-RU',
             'accept-encoding': 'gzip',
             'content-type': 'application/x-www-form-urlencoded'

@@ -1,5 +1,5 @@
 import datetime
-from aiogram import Bot, Dispatcher, Router
+from aiogram import Bot, Dispatcher
 from aiogram.fsm.state import StatesGroup, State
 from aiogram.fsm.storage.memory import MemoryStorage
 from loguru import logger
@@ -24,8 +24,6 @@ class StateWaitMessage(StatesGroup):
 
 bots_list = [Bot(token=BOT_TOKEN, parse_mode='html') for BOT_TOKEN in BOTS_TOKENS]
 dp = Dispatcher(storage=MemoryStorage())
-router = Router()
-dp.include_router(router)
 
 logger.add(f"logs/{datetime.date.today()}.log", format="{time:DD-MMM-YYYY HH:mm:ss} | {level:^25} | {message}",
            enqueue=True, rotation="00:00")
